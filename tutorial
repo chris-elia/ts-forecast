@@ -1,0 +1,14 @@
+pip install streamlit
+pip install pystan==2.19.1.1
+conda install prophet
+
+streamlit run main.py
+
+pip list --format=freeze > requirements.txt
+
+## change interpreter
+Shift+CRTL+P
+
+
+heroku CLI
+anaconda
