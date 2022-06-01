@@ -4,40 +4,92 @@ import numpy as np
 from fetch_data import get_open_data_elia_df
 from forecast_prophet import forecast_prophet
 
-st.title("Timeseries Forecaster")
 
-st.write("Select the data you would like to forecast.")
-button_solar = st.button("Solar Data")
-button_total_load = st.button("Total Load")
+
+
+st.image("data/TimeSeriesForecaster.png")
+"""
+### Introduction
+With this app you can forecast the total load  as well as the PV production of the Belgium Electricity Grid. The live data is fetched from the
+[Elia Open Data Platform](https://www.elia.be/en/grid-data/open-data). 
+In case you do not see any results, you might need to wait a moment as the API only allows a limited number of requests.
+"""
+
+st.markdown(
+    """ ### Data Selection 
+    Select the data from Elia grid you would like to forecast."""
+    )
+
+
+col1, col2, col3 = st.columns(3)
+button_total_load = col1.button("Total Load ")
+button_solar = col2.button("PV production")
+button_wind = col3.button("Wind production")
+
+"""
+### Training Data and Forecast Horizon
+Select the number of days from historical data that will be used for the model training. Next, choose the number of days that you like to predict.
+
+"""
+col1, col2 = st.columns(2)
+no_days = col1.slider("Historical data in days.", min_value=1, max_value=14 )
+button_periods_to_predict = col2.slider("Forecast Horizon in days", min_value = 1, max_value = 7 )
+
+
+no_of_quarter_hours = no_days*24*4
+
 df = pd.DataFrame()
 
 ## Fetching the Data from The API
 if button_solar:
-    dataset_solar =  "ods032" # total_load_dataset 
-    df = get_open_data_elia_df(dataset_solar, 1000)
-    df = df.loc[:,["datetime", "eliagridload"]]
+    dataset_solar =  "ods032" # solar data set
+    df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
+    df = df.groupby("datetime").sum()
+    df.reset_index(inplace = True)
+    df = df.loc[:,["datetime", "mostrecentforecast"]]
+    df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
 
+    
 if button_total_load: 
-    dataset_load = "ods003" # solar_dataset 
-    df = get_open_data_elia_df(dataset_load, 1000)
+    dataset_load = "ods003" #  total load dataset
+    df = get_open_data_elia_df(dataset_load, no_of_quarter_hours)
     df = df.loc[:,["datetime", "eliagridload"]]
     df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
-    
+
+if button_wind:
+    dataset_solar =  "ods031" # solar data set
+    df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
+    df = df.groupby("datetime").sum()
+    df.reset_index(inplace = True)
+    df = df.loc[:,["datetime", "mostrecentforecast"]]
+    df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
+
+
 
 if not df.empty:
 
+    """
+    ### Historical Data
+    The following section displays the selected historical data.
+    """
     # Display the data from the API
-    st.write(df)
     st.line_chart(df.set_index("datetime"))
-
+    st.dataframe(df)
 
     # Do the prediction
     df_ts = df.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"})
     forecast, fig_forecast, fig_comp = forecast_prophet(df_ts, 72)
+    """
+    ### Forecast Results
+    The following section displays the forecast results. It is divided into the forecast and a component plot.
+    """
 
-    st.write(forecast)
-    st.write("This is the forecast plot")
+    """
+    #### Forecast Plot
+    """
     st.write(fig_forecast)
+    st.write(forecast.loc[:,["yhat","yhat_lower","yhat_upper"]])
+    st.markdown("#### Components Plot")
     st.write(fig_comp)
 
 
