@@ -43,27 +43,30 @@ df = pd.DataFrame()
 ## Fetching the Data from The API
 if button_solar:
     dataset_solar =  "ods032" # solar data set
-    df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
-    df = df.groupby("datetime").sum()
-    df.reset_index(inplace = True)
-    df = df.loc[:,["datetime", "mostrecentforecast"]]
-    df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
-
-    
+    try:    
+        df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
+        df = df.groupby("datetime").sum()
+        df.reset_index(inplace = True)
+        df = df.loc[:,["datetime", "mostrecentforecast"]]
+        df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
+    except:
+          "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
 if button_total_load: 
     dataset_load = "ods003" #  total load dataset
-    df = get_open_data_elia_df(dataset_load, no_of_quarter_hours)
-    df = df.loc[:,["datetime", "eliagridload"]]
-    df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
-
+    try:
+        df = get_open_data_elia_df(dataset_load, no_of_quarter_hours)
+        df = df.loc[:,["datetime", "eliagridload"]]
+    except:
+          "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
 if button_wind:
     dataset_solar =  "ods031" # solar data set
-    df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
-    df = df.groupby("datetime").sum()
-    df.reset_index(inplace = True)
-    df = df.loc[:,["datetime", "mostrecentforecast"]]
-    df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
-
+    try:
+        df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
+        df = df.groupby("datetime").sum()
+        df.reset_index(inplace = True)
+        df = df.loc[:,["datetime", "mostrecentforecast"]]
+    except:
+        "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
 
 
 if not df.empty:
@@ -91,6 +94,3 @@ if not df.empty:
     st.write(forecast.loc[:,["yhat","yhat_lower","yhat_upper"]])
     st.markdown("#### Components Plot")
     st.write(fig_comp)
-
-
-
