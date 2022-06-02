@@ -57,8 +57,8 @@ col1, col2 = st.columns(2)
 no_days = col1.slider("Historical data in days.", min_value=1, max_value=14 )
 button_periods_to_predict = col2.slider("Forecast Horizon in days", min_value = 1, max_value = 7 )
 no_of_hours_to_predict = button_periods_to_predict *24
-no_days_hours = no_days*24
-no_of_quarter_hours = no_days*24*4
+
+# initiliazing variables
 forecast = None
 fig_forecast = None
 fig_comp = None
@@ -66,14 +66,19 @@ reg_coef = None
 df = pd.DataFrame()
 forecast_ready= False
 reg_coef = None
+
+# specifying date
 end_date_hist = datetime.now()
 start_date_hist = end_date_hist - timedelta(days = no_days)
 
+# datasets
+dataset_solar = "ods032"
+dataset_load = "ods003"
+dataset_wind =  "ods031"
+
 if forecast_model == "Univariate":
     ## Fetching the Data from The API
-    if button_solar:
-                dataset_solar =  "ods032" # solar data set
-         
+    if button_solar:       
                 df = get_open_data_elia_df(dataset_solar,start_date_hist, end_date_hist) ###### no_of_quarter_hours*14
                 df = df.groupby("datetime").sum()
                 df.reset_index(inplace = True)
@@ -84,7 +89,6 @@ if forecast_model == "Univariate":
         
                 "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
     if button_total_load: 
-            dataset_load = "ods003" #  total load dataset
         
             df = get_open_data_elia_df(dataset_load, start_date_hist, end_date_hist)
             df = df.loc[:,["datetime", "eliagridload"]]
@@ -93,7 +97,7 @@ if forecast_model == "Univariate":
         
             "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
     if button_wind:
-            dataset_wind =  "ods031" # wind data set
+             # wind data set
             df = get_open_data_elia_df(dataset_wind, start_date_hist, end_date_hist) # 14 different departments
             df = df.groupby("datetime").sum()
             df.reset_index(inplace = True)
@@ -122,27 +126,21 @@ if forecast_model == "Multivariate":
         long= "4.34878"
 
         if button_solar:
-               dataset =  "ods032" # solar data set
-               df_merged = prepare_data_for_mv_fc_wind_solar(dataset, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
+               df_merged = prepare_data_for_mv_fc_wind_solar(dataset_solar, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                forecast_ready = True
                df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
             
-        if button_wind:
-                dataset = "ods031" # wind
-            
-                dataset = "ods031" # solar data set
-                df_merged = prepare_data_for_mv_fc_wind_solar(dataset, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
+        if button_wind:            
+
+                df_merged = prepare_data_for_mv_fc_wind_solar(dataset_wind, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                 print("This is df_merged" + str(df_merged))
                 forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                 forecast_ready = True
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
             
-            
         if button_total_load:
-                dataset = "ods003" ## total load
-            
-                df_merged = prepare_data_for_mv_fc_total_load(dataset, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
+                 df_merged = prepare_data_for_mv_fc_total_load(dataset_load, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                 forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                 forecast_ready = True
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
