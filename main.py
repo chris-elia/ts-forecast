@@ -37,7 +37,7 @@ Select the number of days from historical data that will be used for the model t
 col1, col2 = st.columns(2)
 no_days = col1.slider("Historical data in days.", min_value=1, max_value=14 )
 button_periods_to_predict = col2.slider("Forecast Horizon in days", min_value = 1, max_value = 7 )
-
+no_of_hours_to_predict = button_periods_to_predict *24
 
 no_of_quarter_hours = no_days*24*4
 
@@ -64,7 +64,7 @@ if button_total_load:
 if button_wind:
     dataset_solar =  "ods031" # solar data set
     try:
-        df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
+        df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14) # 14 different departments
         df = df.groupby("datetime").sum()
         df.reset_index(inplace = True)
         df = df.loc[:,["datetime", "mostrecentforecast"]]
@@ -84,7 +84,7 @@ if not df.empty:
 
     # Do the prediction
     df_ts = df.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"})
-    forecast, fig_forecast, fig_comp = forecast_prophet(df_ts, button_periods_to_predict)
+    forecast, fig_forecast, fig_comp = forecast_prophet(df_ts, no_of_hours_to_predict)
     """
     ### Forecast Results
     The following section displays the forecast results. It is divided into the forecast and a component plot.
