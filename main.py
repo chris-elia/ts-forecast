@@ -84,7 +84,7 @@ if not df.empty:
 
     # Do the prediction
     df_ts = df.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"})
-    forecast, fig_forecast, fig_comp = forecast_prophet(df_ts, 72)
+    forecast, fig_forecast, fig_comp = forecast_prophet(df_ts, button_periods_to_predict)
     """
     ### Forecast Results
     The following section displays the forecast results. It is divided into the forecast and a component plot.
