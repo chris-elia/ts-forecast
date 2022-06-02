@@ -116,7 +116,7 @@ if not df.empty:
         download_button(
             convert_df(df), 
             f'input_data_{now.strftime("%d/%m/%Y_%H:%M:%S")}.csv', 
-            "Download your selected input data source"),
+            "Download Selected Input Data Source"),
             unsafe_allow_html=True
         )
 
@@ -124,7 +124,7 @@ if not df.empty:
         download_button(
             convert_df(forecast),
             f'forecast_data_{now.strftime("%d/%m/%Y_%H:%M:%S")}.csv',
-            "Download the forecast results"),
+            "Download Forecast Results"),
             unsafe_allow_html=True
         )
     
