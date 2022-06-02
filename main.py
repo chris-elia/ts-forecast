@@ -14,7 +14,7 @@ st.image("data/TimeSeriesForecaster.png")
 """
 ### Introduction
 With this app you can forecast the Total Load, the PV production as well as the Wind production of the Belgium Electricity Grid. The live data is fetched from the
-[Elia Open Data Platform](https://www.elia.be/en/grid-data/open-data). At the moment it is a univariate forecast only.
+[Elia Open Data Platform](https://www.elia.be/en/grid-data/open-data). 
 In case you do not see any results, you might need to wait a moment as the API only allows a limited number of requests.
 """
 
