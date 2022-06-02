@@ -103,9 +103,9 @@ if not df.empty:
 
     """
     ### Download Section
-    You can download the input data and the forecast results as .csv file. 
+    You can download the **Input Data** and the **Forecast Results** as a .csv file. 
     The Input Data is fetched from the Elia Open Data Platform. 
-    The Forecast Results include in-sample prediction (historical) and the out-of-sample prediction
+    The Forecast Results include in-sample prediction (historical) and the out-of-sample prediction.
     """
     # get current data
     now = datetime.now()
