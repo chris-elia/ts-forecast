@@ -26,3 +26,10 @@ def forecast_prophet(df, periods):
     fig_comp = m.plot_components(forecast)
     
     return forecast, fig_forecast, fig_comp
+
+
+def run_forecast_univariate(df, no_of_hours_to_predict):
+    # Do the prediction
+    df_ts = df.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"})
+    forecast, fig_forecast, fig_comp = forecast_prophet(df_ts, no_of_hours_to_predict)
+    return  forecast, fig_forecast, fig_comp
