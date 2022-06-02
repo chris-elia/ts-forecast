@@ -1,9 +1,12 @@
+from doctest import DocFileCase
+from lib2to3.pgen2.pgen import DFAState
 import streamlit as st
 import pandas as pd
 import numpy as np
 from fetch_data import get_open_data_elia_df
 from forecast_prophet import forecast_prophet
-
+from datetime import datetime
+from download_button import download_button
 
 
 
@@ -91,6 +94,38 @@ if not df.empty:
     #### Forecast Plot
     """
     st.write(fig_forecast)
-    st.write(forecast.loc[:,["yhat","yhat_lower","yhat_upper"]])
+    forecast.rename(columns={"ds":"datetime"}, inplace = True)
+
+    # selection of the most important columns of forecast dataframe
+    st.write(forecast.loc[:,["datetime","yhat","yhat_lower","yhat_upper"]])
     st.markdown("#### Components Plot")
     st.write(fig_comp)
+
+    """
+    ### Download Section
+    """
+    # get current data
+    now = datetime.now()
+
+    # function to convert dataframe to csv
+    def convert_df(df):
+        return df.to_csv().encode("utf-8")
+
+    col1, col2 = st.columns(2)
+    col1.markdown(
+        download_button(
+            convert_df(df), 
+            f'input_data_{now.strftime("%d/%m/%Y_%H:%M:%S")}.csv', 
+            "Download your selected input data source"),
+            unsafe_allow_html=True
+        )
+
+    col2.markdown(
+        download_button(
+            convert_df(forecast),
+            f'forecast_data_{now.strftime("%d/%m/%Y_%H:%M:%S")}.csv',
+            "Download the forecast results"),
+            unsafe_allow_html=True
+        )
+    
+
