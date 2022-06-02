@@ -140,7 +140,7 @@ if forecast_model == "Multivariate":
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
             
         if button_total_load:
-                 df_merged = prepare_data_for_mv_fc_total_load(dataset_load, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
+                df_merged = prepare_data_for_mv_fc_total_load(dataset_load, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                 forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                 forecast_ready = True
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
