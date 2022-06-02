@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from fetch_data import get_open_data_elia_df
 from forecast_prophet import forecast_prophet, run_forecast_univariate
-from datetime import datetime
+from datetime import datetime, timedelta
 from download_button import download_button
 from forecast_multivariate import prepare_data_for_mv_fc_total_load, forecast_prophet_multivariate, prepare_data_for_mv_fc_wind_solar
 import logging
@@ -17,9 +17,9 @@ from helper import check_regressors
 ## setting the config of the logger: 
 # stream = sys.stdout ->  print the log directly under the notebook window
 # level -> sets the level of the logger. available levels are: DEBUG, INFO, WARNING, ERROR, CRITICAL
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-logger = logging.getLogger('LOG_Streamlit') # create logger object 
+
+logging.debug("Test")
 
 st.image("data/TimeSeriesForecaster.png")
 """
@@ -66,40 +66,41 @@ reg_coef = None
 df = pd.DataFrame()
 forecast_ready= False
 reg_coef = None
+end_date_hist = datetime.now()
+start_date_hist = end_date_hist - timedelta(days = no_days)
 
 if forecast_model == "Univariate":
     ## Fetching the Data from The API
     if button_solar:
-        dataset_solar =  "ods032" # solar data set
-        try:    
-                df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14)
+                dataset_solar =  "ods032" # solar data set
+         
+                df = get_open_data_elia_df(dataset_solar,start_date_hist, end_date_hist) ###### no_of_quarter_hours*14
                 df = df.groupby("datetime").sum()
                 df.reset_index(inplace = True)
                 df = df.loc[:,["datetime", "mostrecentforecast"]]
                 df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
                 forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
                 forecast_ready = True
-        except:
+        
                 "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
     if button_total_load: 
-        dataset_load = "ods003" #  total load dataset
-        try:
-            df = get_open_data_elia_df(dataset_load, no_of_quarter_hours)
+            dataset_load = "ods003" #  total load dataset
+        
+            df = get_open_data_elia_df(dataset_load, start_date_hist, end_date_hist)
             df = df.loc[:,["datetime", "eliagridload"]]
             forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
             forecast_ready = True
-        except:
+        
             "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
     if button_wind:
-        dataset_solar =  "ods031" # solar data set
-        try:
-            df = get_open_data_elia_df(dataset_solar, no_of_quarter_hours*14) # 14 different departments
+            dataset_wind =  "ods031" # wind data set
+            df = get_open_data_elia_df(dataset_wind, start_date_hist, end_date_hist) # 14 different departments
             df = df.groupby("datetime").sum()
             df.reset_index(inplace = True)
             df = df.loc[:,["datetime", "mostrecentforecast"]]
             forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
             forecast_ready = True
-        except:
+        
             "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
 
 
@@ -121,38 +122,32 @@ if forecast_model == "Multivariate":
         long= "4.34878"
 
         if button_solar:
-            try:
                dataset =  "ods032" # solar data set
-               df_merged = prepare_data_for_mv_fc_wind_solar(dataset, no_of_quarter_hours*14, solar, wind, temp, lat,long)
+               df_merged = prepare_data_for_mv_fc_wind_solar(dataset, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                forecast_ready = True
                df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
-            except:
-                "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
-
+            
         if button_wind:
-            dataset = "ods031" # wind
-            try:
+                dataset = "ods031" # wind
+            
                 dataset = "ods031" # solar data set
-                df_merged = prepare_data_for_mv_fc_wind_solar(dataset, no_of_quarter_hours*14, solar, wind, temp, lat,long)
+                df_merged = prepare_data_for_mv_fc_wind_solar(dataset, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                 print("This is df_merged" + str(df_merged))
                 forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                 forecast_ready = True
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
-            except:
-                    "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
-
+            
             
         if button_total_load:
-            dataset = "ods003" ## total load
-            try:    
-                df_merged = prepare_data_for_mv_fc_total_load(dataset, no_days_hours , solar, wind, temp, lat,long)
+                dataset = "ods003" ## total load
+            
+                df_merged = prepare_data_for_mv_fc_total_load(dataset, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                 forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                 forecast_ready = True
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
-            except:
-                    "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
-
+           
+               
           
 
     else:

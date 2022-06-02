@@ -15,13 +15,13 @@ import pandas as pd
 logger = logging.getLogger('LOG_Forecast_MV') # create logger object 
 
 
-def prepare_data_for_mv_fc_total_load(dataset, historical_data_in_h, solar, wind, temp, lat,long):
+def prepare_data_for_mv_fc_total_load(dataset, start_date, end_date, solar, wind, temp, lat,long):
     """
     dataset:  API dataset id 
     
     """
     # catch open data
-    df = get_open_data_elia_df(dataset,historical_data_in_h) 
+    df = get_open_data_elia_df(dataset,start_date, end_date) 
     df.set_index(df["datetime"], inplace = True)
     df = df.resample("H").mean()
     df.reset_index(inplace = True)
@@ -33,6 +33,7 @@ def prepare_data_for_mv_fc_total_load(dataset, historical_data_in_h, solar, wind
     longitude = long
 
     # get weather forecast
+    print()
     logger.debug("Start_date:" + str(start_date))
     logger.debug("End_date:" + str(end_date))
     df_weather = get_weather_forecast(str(start_date), str(end_date), latitude, longitude)
@@ -50,28 +51,32 @@ def prepare_data_for_mv_fc_total_load(dataset, historical_data_in_h, solar, wind
     # join dataframe
     logger.debug("this is the df" + str(df.head()))
     logger.debug("this is the weather_Df" + str(df_weather.head()))
+
+    print("This is the weather df: " + str(df_weather))
     
     df_merged = merge_df_with_add_reg(df, df_weather, "datetime", "datetime")
     df_merged.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"}, inplace = True)
     return df_merged
 
-def prepare_data_for_mv_fc_wind_solar(dataset, historical_data_in_h, solar, wind, temp, lat,long):
+def prepare_data_for_mv_fc_wind_solar(dataset, start_date, end_date, solar, wind, temp, lat,long):
     """
     dataset:  API dataset id 
     
     """
     print(dataset)
-    print(historical_data_in_h)
+    print(start_date)
+    print(end_date)
     print(solar)
     print(wind)
     print(temp)
     print(lat)
     print(long) 
     # catch open data
-    df = get_open_data_elia_df(dataset,historical_data_in_h) 
+    df = get_open_data_elia_df(dataset,start_date, end_date) 
     print("open data df")
     print(df)
     df = df.groupby("datetime").sum()
+    print(df)
     #df.set_index(df["datetime"], inplace = True)    
     df = df.resample("H").mean()
     df.reset_index(inplace = True)
@@ -87,10 +92,10 @@ def prepare_data_for_mv_fc_wind_solar(dataset, historical_data_in_h, solar, wind
     longitude = long
 
     # get weather forecast
-    print("Start_date:" + str(start_date))
-    print("End_date:" + str(end_date))
+    print("fc_mv: Start_date:" + str(start_date))
+    print("fc_mv: End_date:" + str(end_date))
 
-    df_weather = get_weather_forecast(str(start_date), str(end_date), latitude, longitude)
+    df_weather = get_weather_forecast(start_date, end_date, latitude, longitude)
     columns = []
     if solar:
         columns.append("SolarDownwardRadiation")

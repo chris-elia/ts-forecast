@@ -1,32 +1,26 @@
 import pandas as pd
 import requests
-def get_open_data_elia_df(dataset, no_rows):
+
+def get_open_data_elia_df(dataset, start_date, end_date):
     """
     params:
     
     output:
     
     """
-    # parameters for the query
-    dataset_url = "https://opendata.elia.be/api/records/1.0/search"
-    dataset_params = {
-    "dataset" : dataset,
-    "rows":no_rows,
-    "sort":"datetime",
-    "timezone":"Europe/Berlin"
-    }
-    
+
+    url = f"https://opendata.elia.be/api/v2/catalog/datasets/{dataset}/exports/"
+    json_string = f"json?where=datetime in [date'{start_date}' .. date'{end_date}']"
+    print(url + json_string)
+    response = requests.get(url = url + json_string)
     # calling the Elia Open Data API
-    response = requests.get(dataset_url,dataset_params).json()
-    
-    # Converting the results to a formatted dataframe
-    dfs = []
-    for i in range(len(response["records"])):
-        dfs.append(pd.DataFrame(response["records"][i]["fields"],index = [i]))
-    dfs = pd.concat(dfs)
-    dfs["datetime"] = pd.to_datetime(dfs["datetime"]).dt.tz_localize(None)
-    
-    return dfs
+    print(response.json)
+    df = pd.DataFrame(response.json())
+    print(df)
+    df.sort_values(by = "datetime", inplace = True)
+    df.reset_index(inplace = True, drop =  True)    
+    df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
+    return df
 
 
 ## getting the solar forecast from Realto
@@ -34,6 +28,9 @@ def get_weather_forecast(start_date, end_date, latitude, longitude):
 
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
+
+    print("Start_date in weather_Forecast: " + str(start_date))
+    print("End date in  weather_Forecast:" + str(end_date))
     # Authentication
     url = "https://api.rebase.energy/weather/v2/query"
     headers = {"Authorization": "W-cRKEYdwzL6mdWCYO2_UZSOWI1MxET07dquSY9Fck4"}
