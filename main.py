@@ -87,7 +87,6 @@ if forecast_model == "Univariate":
                 forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
                 forecast_ready = True
         
-                "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
     if button_total_load: 
         
             df = get_open_data_elia_df(dataset_load, start_date_hist, end_date_hist)
@@ -95,7 +94,6 @@ if forecast_model == "Univariate":
             forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
             forecast_ready = True
         
-            "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
     if button_wind:
              # wind data set
             df = get_open_data_elia_df(dataset_wind, start_date_hist, end_date_hist) # 14 different departments
@@ -105,8 +103,6 @@ if forecast_model == "Univariate":
             forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
             forecast_ready = True
         
-            "**The API was not able to provide the data. Try to reduce the historical data in days or wait a moment.**"
-
 
  
 if forecast_model == "Multivariate":
