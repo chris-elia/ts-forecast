@@ -103,6 +103,9 @@ if not df.empty:
 
     """
     ### Download Section
+    You can download the input data and the forecast results as .csv file. 
+    The Input Data is fetched from the Elia Open Data Platform. 
+    The Forecast Results include in-sample prediction (historical) and the out-of-sample prediction
     """
     # get current data
     now = datetime.now()
@@ -116,7 +119,7 @@ if not df.empty:
         download_button(
             convert_df(df), 
             f'input_data_{now.strftime("%d/%m/%Y_%H:%M:%S")}.csv', 
-            "Download Selected Input Data Source"),
+            "Download Input Data Source"),
             unsafe_allow_html=True
         )
 
