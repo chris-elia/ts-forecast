@@ -57,7 +57,6 @@ col1, col2 = st.columns(2)
 no_days = col1.slider("Historical data in days.", min_value=1, max_value=14 )
 button_periods_to_predict = col2.slider("Forecast Horizon in days", min_value = 1, max_value = 7 )
 no_of_hours_to_predict = button_periods_to_predict *24
-
 # initiliazing variables
 forecast = None
 fig_forecast = None
@@ -142,8 +141,6 @@ if forecast_model == "Multivariate":
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
            
                
-          
-
     else:
         st.write("Please select at least one regressor.")
 
@@ -157,9 +154,6 @@ if not df.empty:
     # Display the data from the API
     st.line_chart(df.set_index("datetime"))
     st.dataframe(df)
-
-
-
 
 
 if forecast_ready:
