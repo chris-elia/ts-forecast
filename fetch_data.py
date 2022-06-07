@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import streamlit as st
 
 def get_open_data_elia_df(dataset, start_date, end_date):
     """
@@ -33,7 +34,7 @@ def get_weather_forecast(start_date, end_date, latitude, longitude):
     print("End date in  weather_Forecast:" + str(end_date))
     # Authentication
     url = "https://api.rebase.energy/weather/v2/query"
-    headers = {"Authorization": "W-cRKEYdwzL6mdWCYO2_UZSOWI1MxET07dquSY9Fck4"}
+    headers = {"Authorization": st.secrets["REBASE_KEY"]}
     params = {
         'model': 'FMI_HIRLAM',
         'start-date': start_date,

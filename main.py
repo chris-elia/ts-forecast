@@ -14,25 +14,27 @@ from helper import check_regressors
 
 
 
-## setting the config of the logger: 
-# stream = sys.stdout ->  print the log directly under the notebook window
-# level -> sets the level of the logger. available levels are: DEBUG, INFO, WARNING, ERROR, CRITICAL
-
-
-logging.debug("Test")
-
 st.image("data/TimeSeriesForecaster.png")
 """
 ### Introduction
 With this app you can forecast the Total Load, the PV production as well as the Wind production of the Belgium Electricity Grid. The live data is fetched from the
 [Elia Open Data Platform](https://www.elia.be/en/grid-data/open-data). 
-In case you do not see any results, you might need to wait a moment as the API only allows a limited number of requests.
+
+Please select the forecasting method and choose the data point to forecast from the drop-down menu. Next, choose the historical data to be used for training the model as well as the forecast horizon to predict. 
+After the calculation, the results are displayed below with the option to export as .csv files.
 """
 
 """
 ### Forecasting Method
+You can choose between univariate and multivariate forecasting: 
 
+**Univariate** forecasting only takes historical data and tries to find patterns based on seasonality to predict the forecast. It is good and quick solution if the data includes periodicity and is not heavily dependent on other features. 
+
+**Multivariate** forecasting adds additional features e.g. wind speed, solar radiation or temperature to the historical data to improve the forecast. If the rght additional features are selected, it will offer a better forecast but requires more time to calculate.
+
+**Example:** If you have a PV system on-site, experiment with adding solar radiation as a feature. It could improve the forecast, as you will consume less energy from the grid when the sun is shining. This correlation can be represented by the additional sun radiation feature.  
 """
+
 
 forecast_model = st.radio(
      "Select your forecasting method:",
@@ -43,15 +45,21 @@ st.markdown(
     Select the data from Elia grid you would like to forecast."""
     )
 
-col1, col2, col3 = st.columns(3)
-button_total_load = col1.button("Total Load ")
-button_solar = col2.button("PV production")
-button_wind = col3.button("Wind production")
+options = ["Total Load","PV production","Wind production" ]
+option = st.selectbox(
+        'Select the customer',
+            (options)
+            )
+
+
 
 """
 ### Training Data and Forecast Horizon
-Select the number of days from historical data that will be used for the model training. Next, choose the number of days that you like to predict.
+Select the number of days (**Historical data in days**) that will be used for the model training. Next, choose the **Forecast Horizon in days**, the number of days you like to predict.
+It is recommended to use a timeframe that includes reoccuring patterns for the model to detect. 
 
+**Example:** If you have a weekly production site schedule, choose at least two weeks or more of data to train the model.
+The more data and the longer forecast horizon are selected, the longer it will take to do the prediction.
 """
 col1, col2 = st.columns(2)
 no_days = col1.slider("Historical data in days.", min_value=1, max_value=14 )
@@ -75,35 +83,6 @@ dataset_solar = "ods032"
 dataset_load = "ods003"
 dataset_wind =  "ods031"
 
-if forecast_model == "Univariate":
-    ## Fetching the Data from The API
-    if button_solar:       
-                df = get_open_data_elia_df(dataset_solar,start_date_hist, end_date_hist) ###### no_of_quarter_hours*14
-                df = df.groupby("datetime").sum()
-                df.reset_index(inplace = True)
-                df = df.loc[:,["datetime", "mostrecentforecast"]]
-                df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
-                forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
-                forecast_ready = True
-        
-    if button_total_load: 
-        
-            df = get_open_data_elia_df(dataset_load, start_date_hist, end_date_hist)
-            df = df.loc[:,["datetime", "eliagridload"]]
-            forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
-            forecast_ready = True
-        
-    if button_wind:
-             # wind data set
-            df = get_open_data_elia_df(dataset_wind, start_date_hist, end_date_hist) # 14 different departments
-            df = df.groupby("datetime").sum()
-            df.reset_index(inplace = True)
-            df = df.loc[:,["datetime", "mostrecentforecast"]]
-            forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
-            forecast_ready = True
-        
-
- 
 if forecast_model == "Multivariate":
     
     """
@@ -114,47 +93,87 @@ if forecast_model == "Multivariate":
         "Select the additional parameters for the forecast. At least, one has to be selected.",
         options = ["Sun Radiation", "Wind Speed", "Temperature"])
 
+    if  not add_regressors:
+        st.markdown("**Please select at least one additional parameter.**")
+
+calc_start = st.button("Start Calculation")
+
+
+if forecast_model == "Univariate" and calc_start:
+    ## Fetching the Data from The API
+    if option == "PV production":       
+                df = get_open_data_elia_df(dataset_solar,start_date_hist, end_date_hist) ###### no_of_quarter_hours*14
+                df = df.groupby("datetime").sum()
+                df.reset_index(inplace = True)
+                df = df.loc[:,["datetime", "mostrecentforecast"]]
+                df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_localize(None)
+                forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
+                forecast_ready = True
+        
+    if option == "Total Load": 
+        
+            df = get_open_data_elia_df(dataset_load, start_date_hist, end_date_hist)
+            df = df.loc[:,["datetime", "eliagridload"]]
+            forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
+            forecast_ready = True
+        
+    if option == "Wind production":
+             # wind data set
+            df = get_open_data_elia_df(dataset_wind, start_date_hist, end_date_hist) # 14 different departments
+            df = df.groupby("datetime").sum()
+            df.reset_index(inplace = True)
+            df = df.loc[:,["datetime", "mostrecentforecast"]]
+            forecast, fig_forecast, fig_comp= run_forecast_univariate(df, no_of_hours_to_predict)
+            forecast_ready = True
+        
+
+
+if (forecast_model == "Multivariate") and calc_start:
+    
     if add_regressors:
         
         solar, wind, temp = check_regressors(add_regressors) 
         lat = "50.85045"
         long= "4.34878"
-
-        if button_solar:
-               df_merged = prepare_data_for_mv_fc_wind_solar(dataset_solar, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
-               forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
-               forecast_ready = True
-               df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
-            
-        if button_wind:            
-
-                df_merged = prepare_data_for_mv_fc_wind_solar(dataset_wind, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
-                print("This is df_merged" + str(df_merged))
+        with st.spinner("The forecast is now being calculated."):
+            if option == "PV production": 
+                df_merged = prepare_data_for_mv_fc_wind_solar(dataset_solar, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
                 forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
                 forecast_ready = True
                 df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
+                
+            if option == "Wind production":           
+
+                    df_merged = prepare_data_for_mv_fc_wind_solar(dataset_wind, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
+                    print("This is df_merged" + str(df_merged))
+                    forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
+                    forecast_ready = True
+                    df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
+                
+            if option == "Total Load": 
+                    df_merged = prepare_data_for_mv_fc_total_load(dataset_load, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
+                    forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
+                    forecast_ready = True
+                    df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
             
-        if button_total_load:
-                df_merged = prepare_data_for_mv_fc_total_load(dataset_load, start_date_hist, end_date_hist, solar, wind, temp, lat,long)
-                forecast, fig_forecast, fig_comp, reg_coef = forecast_prophet_multivariate(df_merged, lat, long, no_of_hours_to_predict)
-                forecast_ready = True
-                df = df_merged.loc[:,["ds","y"]].rename(columns= {"ds":"datetime"})
-           
                
     else:
         st.write("Please select at least one regressor.")
 
-
-if not df.empty:
+if not df.empty and option is not None:
 
     """
     ### Historical Data
     The following section displays the selected historical data.
     """
     # Display the data from the API
-    st.line_chart(df.set_index("datetime"))
-    st.dataframe(df)
-
+    df["datetime"] = pd.to_datetime(df["datetime"])
+    df = df.set_index("datetime")
+    
+    df = df.loc[start_date_hist:end_date_hist,:]
+    st.line_chart(df)
+    #st.write(df)
+    df.reset_index(inplace = True)
 
 if forecast_ready:
     
