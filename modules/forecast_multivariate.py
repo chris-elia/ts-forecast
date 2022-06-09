@@ -82,7 +82,6 @@ def prepare_data_for_mv_fc(dataset, start_date, end_date, solar, wind, temp, lat
 def run_forecast_multivariate(df_merged, lat, long, forecast_horizon):
 
     end_date = df_merged["ds"].sort_values().iloc[-1]
-    logger.debug(df_merged["ds"].sort_values())
     start_date_forecast = end_date + timedelta(hours = 1)
     end_date_forecast = start_date_forecast + timedelta(hours = forecast_horizon)
     weather_forecast = get_weather_forecast(start_date_forecast, end_date_forecast, lat, long)
