@@ -86,7 +86,7 @@ def run_forecast_multivariate(df_merged, lat, long, forecast_horizon):
     end_date_forecast = start_date_forecast + timedelta(hours = forecast_horizon)
     weather_forecast = get_weather_forecast(start_date_forecast, end_date_forecast, lat, long)
 
-    m = Prophet(yearly_seasonality=True) 
+    m = Prophet() 
     
     for each in df_merged.columns[2:]:
         m.add_regressor(each)
