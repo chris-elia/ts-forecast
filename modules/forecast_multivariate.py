@@ -72,7 +72,6 @@ def prepare_data_for_mv_fc(dataset, start_date, end_date, solar, wind, temp, lat
 
     columns.append("datetime")
     df_weather = df_weather.loc[:,columns]    
-    #df_merged = merge_df_with_add_reg(df, df_weather, "datetime", "datetime")
     df_merged = df.merge(df_weather, on = "datetime")
 
     df_merged.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"}, inplace = True)
@@ -101,7 +100,6 @@ def run_forecast_multivariate(df_merged, lat, long, forecast_horizon):
     ## periods: Int number of periods to forecast forward. 
     ## req: Any valid frequency for pd.date_range, such as 'D' or 'M'.
     future = m.make_future_dataframe(periods=forecast_horizon, freq = "H")
-    #future = merge_df_with_add_reg(future, weather_forecast, left_on = "ds", right_on="datetime")
     future = future.merge(weather_forecast, left_on= "ds", right_on = "datetime")
 
     # Prediction
@@ -117,8 +115,3 @@ def run_forecast_multivariate(df_merged, lat, long, forecast_horizon):
     
     return forecast, fig_forecast, fig_components, reg_coef
 
-
-
-#def merge_df_with_add_reg(df1, df2, left_on, right_on):
-#    df = df1.merge(df2, left_on= left_on, right_on = right_on)
-#    return df

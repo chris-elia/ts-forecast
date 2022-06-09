@@ -1,21 +1,30 @@
+[Anaconda]
+
 pip install streamlit
 pip install pystan==2.19.1.1
 conda install prophet
 
+[JupyterNotebook]
+
+
+[Visual code studio]
+
 streamlit run main.py
 
+
+[Streamlit Cloud]
 pip list --format=freeze > requirements.txt
+requirement file
+adapt pywin
+typing extension = =3.7.4.3
+
+
 
 ## change interpreter
 Shift+CRTL+P
 
 
 
-anaconda
-
-requirement file
-adapt pywin
-typing extension = =3.7.4.3
 
 
 

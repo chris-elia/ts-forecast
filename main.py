@@ -47,7 +47,7 @@ st.markdown(
 
 options = ["Total Load","PV production","Wind production" ]
 option = st.selectbox(
-        'Select the customer',
+        'Select the data',
             (options)
             )
 
@@ -182,7 +182,7 @@ if forecast_ready:
     """
     #### Forecast Plot
     """
-    
+
     st.write(fig_forecast)
     forecast.rename(columns={"ds":"datetime"}, inplace = True)
 
