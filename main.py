@@ -118,8 +118,14 @@ if forecast_model == "Univariate" and calc_start:
     #  get and prepare data for wind or PV production (univariate)
     if (option == "Wind production") or option == "PV production":
 
-        # Catching and Formatting data for Wind Production     
-        df = get_open_data_elia_df(dataset_wind, start_date_hist, end_date_hist) # 14 different departments
+        # selecting the correct dataset
+        if option == "Wind production":
+            dataset = dataset_wind
+        else:
+            dataset = dataset_solar
+        # Catching and Formatting data for Wind Production    
+        df = get_open_data_elia_df(dataset, start_date_hist, end_date_hist) # 14 different departments
+        
         df = df.groupby("datetime").sum()
         df.reset_index(inplace = True)
         df = df.loc[:,["datetime", "mostrecentforecast"]]
