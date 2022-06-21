@@ -81,7 +81,29 @@ def prepare_data_for_mv_fc(dataset, start_date, end_date, solar, wind, temp, lat
 
 
 def run_forecast_multivariate(df_merged, lat, long, forecast_horizon):
+    """
+    returns the multivariate prophet forecast + two graphic objects (forecast & components) + regressor coeffiecnt dataframe
 
+    Parameters
+    ----------
+    df: DataFrame
+        a dataframe that includes the historical data
+    periods: int
+        the time steps to forecast
+
+    Returns
+    -------
+    forecast
+        a dataframe containing the foecast data
+    fig_forecast
+        a figure forecast to plot
+    fig_components
+        a figure components to plot
+    reg_coef
+        a dataframe with the coefficiencts of the additional regressors
+
+    """
+    
     end_date = df_merged["ds"].sort_values().iloc[-1]
     start_date_forecast = end_date + timedelta(hours = 1)
     end_date_forecast = start_date_forecast + timedelta(hours = forecast_horizon)

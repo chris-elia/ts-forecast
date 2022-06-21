@@ -2,6 +2,27 @@ from prophet import Prophet
 
 def run_forecast_univariate(df, periods):
 
+    """
+    returns the univariate prophet forecast + two graphic objects (forecast & components)
+
+    Parameters
+    ----------
+    df: DataFrame
+        a dataframe that includes the historical data
+    periods: int
+        the time steps to forecast
+
+    Returns
+    -------
+    forecast
+        a dataframe containing the foecast data
+    fig_forecast
+        a figure forecast to plot
+    fig_components
+        a figure components to plot
+    
+    """
+
     #renaming columns for prophet convention
     df = df.rename(columns = {df.columns[0]: "ds", df.columns[1]:"y"})
 
